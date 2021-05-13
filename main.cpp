@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <gdiplus.h>
 #include "awklib.h"
+#include "DesktopWindow.h"
 
 #pragma comment (lib,"Gdiplus.lib")
 
@@ -25,8 +26,13 @@ VOID DrawIconOnDesktop(HDC hDC, PAINTSTRUCT* ps) {
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd) {
+
+    HWND hDesktop;// = Desktop::GetDesktopHandle();
+
+    //return 0;
+
     // check if desktop background always has this handle, if no --> not gud
-    HWND hDesktop = (HWND)0x10202;
+    hDesktop = (HWND)0x10224;
 
     Gdiplus::GdiplusStartupInput gdiplusStartupInput;
     ULONG_PTR gdiplusToken;

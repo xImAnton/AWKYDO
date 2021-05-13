@@ -1,12 +1,18 @@
 #include "DesktopWindow.h"
 
 
-namespace desktop {
+namespace Desktop {
 	BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam) {
 		std::wstring windowClass;
 		windowClass.resize(255);
 		unsigned int chars = ::RealGetWindowClass(hwnd, &*windowClass.begin(), windowClass.size());
 		windowClass.resize(chars);
+
+		std::string s(windowClass.begin(), windowClass.end());
+
+		std::cout << s << std::endl;
+
+		return TRUE;
 
 		if (windowClass != L"SysListView32") {
 			return TRUE;

@@ -37,6 +37,8 @@ BOOL AWKYDO::Window::RegisterWindowClass(HINSTANCE hInst, WNDPROC wndProc) {
 RECT GetDesktopWindowRect(HWND hWnd) {
 	RECT rectClient;
 	GetWindowRect(hWnd, &rectClient);
+	GetClientRect(hWnd, &rectClient);
+	return rectClient;
 	return { 0, 0, rectClient.right - rectClient.left - 1, rectClient.bottom - rectClient.top - 1 };
 }
 

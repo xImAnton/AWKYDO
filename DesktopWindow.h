@@ -58,6 +58,6 @@ void DrawDesktop(HWND hDesktop) {
     }
 }*/
 
-namespace desktop {
+namespace Desktop {
 	HWND GetDesktopHandle();
 }
