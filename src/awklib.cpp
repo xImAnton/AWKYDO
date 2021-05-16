@@ -1,7 +1,7 @@
 #include "awklib.h"
 
 void AWKYDO::Notification::GetNotificationIcon(HWND hWnd, NOTIFYICONDATA* nid) {
-	HICON hIcon = static_cast<HICON>(LoadImage(nullptr, TEXT("icon.ico"), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR | LR_SHARED | LR_DEFAULTSIZE | LR_LOADFROMFILE));
+	HICON hIcon = static_cast<HICON>(LoadImage(nullptr, TEXT("resources/icon.ico"), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR | LR_SHARED | LR_DEFAULTSIZE | LR_LOADFROMFILE));
 
 	nid->cbSize = sizeof(nid);
 	nid->hWnd = hWnd;

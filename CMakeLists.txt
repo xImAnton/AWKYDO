@@ -6,11 +6,8 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_compile_definitions(_UNICODE)
 
-set(SOURCES
-        src/main.cpp
-        src/awklib.cpp
-        src/DesktopWindow.cpp
-        src/awklib.h
-        src/DesktopWindow.h)
+file(GLOB SOURCES CONFIGURE_DEPENDS "src/*.h" "src/*.cpp")
 
 add_executable(AWKYDO WIN32 ${SOURCES})
+
+file(COPY ${CMAKE_SOURCE_DIR}/resources DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")

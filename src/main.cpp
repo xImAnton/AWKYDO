@@ -11,7 +11,7 @@ VOID DrawIconOnDesktop(HDC hDC, PAINTSTRUCT* ps) {
     // FillRect(hDC, &(ps->rcPaint), brush);
 
     Gdiplus::Graphics graphics(hDC);
-    auto* im = new Gdiplus::Image(L"icon.png");
+    auto* im = new Gdiplus::Image(L"resources/icon.png");
 
     UINT screenHeight = ps->rcPaint.bottom - ps->rcPaint.top - 1;
 
