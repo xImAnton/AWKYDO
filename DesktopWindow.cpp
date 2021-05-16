@@ -17,6 +17,16 @@ struct EnumTopLevelWindowPayload {
 };
 
 
+BOOL CALLBACK EnumWorkerWChildProc(HWND hWnd, LPARAM lParam) {
+    if (IsWindowOfClass(hWnd, "SHELLDLL_DefView")) {
+        BOOL* foundDesktopIcons = reinterpret_cast<BOOL*>(lParam);
+        *foundDesktopIcons = TRUE;
+        return FALSE;
+    }
+    return TRUE;
+}
+
+
 BOOL CALLBACK EnumTopLevelWindowProc(HWND hwnd, LPARAM lParam) {
     EnumTopLevelWindowPayload* payload = reinterpret_cast<EnumTopLevelWindowPayload*>(lParam);
 
@@ -26,18 +36,17 @@ BOOL CALLBACK EnumTopLevelWindowProc(HWND hwnd, LPARAM lParam) {
         return FALSE;
     }
 
-    if (IsWindowOfClass(hwnd, "SysHeader32")) {
-        payload->foundDesktopIcons = TRUE;
+    if (IsWindowOfClass(hwnd, "WorkerW")) {
+        EnumChildWindows(hwnd, EnumWorkerWChildProc, reinterpret_cast<LPARAM>(&payload->foundDesktopIcons));
     }
 
     return TRUE;
 }
 
-HWND AWKYDO::Desktop::GetDesktopBackgroundHandle() {
-    HWND desktopWindow = GetDesktopWindow();
 
+HWND AWKYDO::Desktop::GetDesktopBackgroundHandle() {
     EnumTopLevelWindowPayload payload = { nullptr, FALSE };
-    EnumChildWindows(desktopWindow, EnumTopLevelWindowProc, reinterpret_cast<LPARAM>(&payload));
+    EnumWindows(EnumTopLevelWindowProc, reinterpret_cast<LPARAM>(&payload));
 
     return payload.backgroundWorkerW;
 }

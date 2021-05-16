@@ -11,7 +11,7 @@ void AWKYDO::Notification::GetNotificationIcon(HWND hWnd, NOTIFYICONDATA* nid) {
 	nid->hIcon = hIcon;
 
 	// tooltip
-	StringCchCopy(nid->szTip, ARRAYSIZE(nid->szTip), (LPCSTR)L"AWKYDO");
+	StringCchCopy(nid->szTip, ARRAYSIZE(nid->szTip), "AWKYDO");
 }
 
 void AWKYDO::Notification::RegisterNotificationIcon(HWND hWnd) {

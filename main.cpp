@@ -26,13 +26,17 @@ VOID DrawIconOnDesktop(HDC hDC, PAINTSTRUCT* ps) {
     graphics.DrawImage(im, destRect);
 }
 
+
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd) {
 
     HWND hDesktop = AWKYDO::Desktop::GetDesktopBackgroundHandle();
 
     std::cout << "Desktop Handle " << hDesktop << std::endl;
+
+    // return 0;
 
     Gdiplus::GdiplusStartupInput gdiplusStartupInput;
     ULONG_PTR gdiplusToken;
