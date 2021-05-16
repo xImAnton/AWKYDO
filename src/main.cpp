@@ -1,5 +1,5 @@
 #include <tchar.h>
-#include <windows.h>
+#include <Windows.h>
 #include <gdiplus.h>
 #include "awklib.h"
 #include "DesktopWindow.h"
