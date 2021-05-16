@@ -27,12 +27,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd) {
 
-    HWND hDesktop;// = Desktop::GetDesktopHandle();
-
-    //return 0;
-
-    // check if desktop background always has this handle, if no --> not gud
-    hDesktop = (HWND)0x10224;
+    HWND hDesktop = Desktop::GetDesktopBackgroundHandle();
 
     Gdiplus::GdiplusStartupInput gdiplusStartupInput;
     ULONG_PTR gdiplusToken;

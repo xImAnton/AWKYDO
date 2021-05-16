@@ -59,5 +59,5 @@ void DrawDesktop(HWND hDesktop) {
 }*/
 
 namespace Desktop {
-	HWND GetDesktopHandle();
+	HWND GetDesktopBackgroundHandle();
 }

@@ -1,6 +1,9 @@
 #include "DesktopWindow.h"
 
 
+BOOL bFoundSysHeader32 = FALSE;
+
+
 namespace Desktop {
 	BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam) {
 		std::wstring windowClass;
@@ -8,26 +11,20 @@ namespace Desktop {
 		unsigned int chars = ::RealGetWindowClass(hwnd, &*windowClass.begin(), windowClass.size());
 		windowClass.resize(chars);
 
-		std::string s(windowClass.begin(), windowClass.end());
-
-		std::cout << s << std::endl;
-
-		return TRUE;
-
-		if (windowClass != L"SysListView32") {
-			return TRUE;
+		if (bFoundSysHeader32) {
+			HWND* hWorkerW = reinterpret_cast<HWND*>(lParam);
+			*hWorkerW = hwnd;
+			return FALSE;
 		}
 
-		HWND* folderView = reinterpret_cast<HWND*>(lParam);
-		int num = 10202;
-		*folderView = hwnd;
+		if (windowClass == L"SysHeader32") {
+			bFoundSysHeader32 = TRUE;
+		}
 
-		std::cout << "Found" << std::endl;
-
-		return FALSE;
+		return TRUE;
 	}
 
-	HWND GetDesktopHandle() {
+	HWND GetDesktopBackgroundHandle() {
 		HWND desktopWindow = GetDesktopWindow();
 
 		HWND folderView = 0;
