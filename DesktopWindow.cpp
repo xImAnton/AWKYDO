@@ -4,32 +4,41 @@
 BOOL bFoundSysHeader32 = FALSE;
 
 
-namespace Desktop {
-	BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam) {
-		std::wstring windowClass;
-		windowClass.resize(255);
-		unsigned int chars = ::RealGetWindowClass(hwnd, &*windowClass.begin(), windowClass.size());
-		windowClass.resize(chars);
+BOOL IsWindowOfClass(HWND hWnd, LPSTR className) {
+    LPSTR windowClassName = new TCHAR[255];
+    RealGetWindowClass(hWnd, windowClassName, 255);
 
-		if (bFoundSysHeader32) {
-			HWND* hWorkerW = reinterpret_cast<HWND*>(lParam);
-			*hWorkerW = hwnd;
-			return FALSE;
-		}
+    return _tcsicmp(className, className) == 0;
+}
 
-		if (windowClass == L"SysHeader32") {
-			bFoundSysHeader32 = TRUE;
-		}
 
-		return TRUE;
-	}
+BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam) {
+    //std::wstring a;
+    LPSTR className = new TCHAR[255];
+    //a.resize(255);
+    int size = RealGetWindowClass(hwnd, className, 255);
+    //a.resize(size);
 
-	HWND GetDesktopBackgroundHandle() {
-		HWND desktopWindow = GetDesktopWindow();
+    if (bFoundSysHeader32) {
+        std::cout << "found" << std::endl;
+        HWND* hWorkerW = reinterpret_cast<HWND*>(lParam);
+        *hWorkerW = hwnd;
+        return FALSE;
+    }
 
-		HWND folderView = 0;
-		EnumChildWindows(desktopWindow, EnumChildProc, reinterpret_cast<LPARAM>(&folderView));
+    if (_tcsicmp(className, _T("sysheader32")) == 0) {
+        bFoundSysHeader32 = TRUE;
+    }
 
-		return folderView;
-	}
+    return TRUE;
+}
+
+HWND AWKYDO::Desktop::GetDesktopBackgroundHandle() {
+    HWND desktopWindow = GetDesktopWindow();
+
+    HWND folderView = nullptr;
+    EnumChildWindows(desktopWindow, EnumChildProc, reinterpret_cast<LPARAM>(&folderView));
+    std::cout << "getbg" << std::endl;
+
+    return folderView;
 }

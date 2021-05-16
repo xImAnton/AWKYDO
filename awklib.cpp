@@ -1,17 +1,17 @@
 #include "awklib.h"
 
 void AWKYDO::Notification::GetNotificationIcon(HWND hWnd, NOTIFYICONDATA* nid) {
-	HICON hIcon = static_cast<HICON>(LoadImage(NULL, TEXT("icon.ico"), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR | LR_SHARED | LR_DEFAULTSIZE | LR_LOADFROMFILE));
+	HICON hIcon = static_cast<HICON>(LoadImage(nullptr, TEXT("icon.ico"), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR | LR_SHARED | LR_DEFAULTSIZE | LR_LOADFROMFILE));
 
 	nid->cbSize = sizeof(nid);
 	nid->hWnd = hWnd;
-	nid->guidItem = AWK_GUID_NOTIFICATIONICON;
+	nid->guidItem = AWK_GUID_NOTIFICATION_ICON;
 	nid->uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE | NIF_GUID;
-	nid->uCallbackMessage = AWK_WM_ICONNOTIFY;
+	nid->uCallbackMessage = AWK_WM_ICON_NOTIFY;
 	nid->hIcon = hIcon;
 
 	// tooltip
-	StringCchCopy(nid->szTip, ARRAYSIZE(nid->szTip), L"AWKYDO");
+	StringCchCopy(nid->szTip, ARRAYSIZE(nid->szTip), (LPCSTR)L"AWKYDO");
 }
 
 void AWKYDO::Notification::RegisterNotificationIcon(HWND hWnd) {
@@ -28,7 +28,7 @@ BOOL AWKYDO::Window::RegisterWindowClass(HINSTANCE hInst, WNDPROC wndProc) {
 	wc.lpszClassName = sWindowClassName;
 
 	if (!RegisterClass(&wc)) {
-		MessageBox(NULL, L"Call to RegisterClass failed!", sWindowClassName, NULL);
+		MessageBox(nullptr, (LPCSTR)L"Call to RegisterClass failed!", sWindowClassName, NULL);
 		return FALSE;
 	}
 	return TRUE;
@@ -36,10 +36,8 @@ BOOL AWKYDO::Window::RegisterWindowClass(HINSTANCE hInst, WNDPROC wndProc) {
 
 RECT GetDesktopWindowRect(HWND hWnd) {
 	RECT rectClient;
-	GetWindowRect(hWnd, &rectClient);
 	GetClientRect(hWnd, &rectClient);
 	return rectClient;
-	return { 0, 0, rectClient.right - rectClient.left - 1, rectClient.bottom - rectClient.top - 1 };
 }
 
 HWND AWKYDO::Window::CreateOverlayWindow(HINSTANCE hInst, HWND hDesktop) {
@@ -47,11 +45,11 @@ HWND AWKYDO::Window::CreateOverlayWindow(HINSTANCE hInst, HWND hDesktop) {
 
 	return CreateWindowEx(WS_EX_NOACTIVATE, // extended style
 		sWindowClassName, // window class
-		NULL, // title
+		nullptr, // title
 		WS_CHILD | WS_VISIBLE, // styles
 		rectDesktopWindow.left, rectDesktopWindow.top, rectDesktopWindow.right, rectDesktopWindow.bottom,
 		hDesktop, // parent
-		NULL, // menu
+		nullptr, // menu
 		hInst, // module instance
-		NULL); // lpParam
+		nullptr); // lpParam
 }
