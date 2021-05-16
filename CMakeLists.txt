@@ -4,6 +4,7 @@ project(AWKYDO VERSION 0.3)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+add_compile_definitions(_UNICODE)
 
 set(SOURCES
         main.cpp
