@@ -1,12 +1,13 @@
 #include <tchar.h>
 #include <Windows.h>
 #include <gdiplus.h>
-#include "awklib.h"
+#include "window.h"
 #include "DesktopWindow.h"
+#include "notification.h"
 
 #pragma comment (lib, "Gdiplus.lib")
 
-VOID DrawIconOnDesktop(HDC hDC, PAINTSTRUCT* ps) {
+VOID DrawLogoOnDesktop(HDC hDC, PAINTSTRUCT* ps) {
     Gdiplus::Graphics graphics(hDC);
 
     // load app logo and display to desktop background
@@ -30,7 +31,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd) {
     // first, get the desktop background handle
-    HWND hDesktop = AWKYDO::Desktop::GetDesktopBackgroundHandle();
+    HWND hDesktop = AWKYDO::GetDesktopBackgroundHandle();
     std::cout << "Desktop Handle: " << hDesktop << std::endl;
 
     // Initialize GDI+.
@@ -44,7 +45,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     HWND hWindow = AWKYDO::Window::CreateOverlayWindow(hInstance, hDesktop);
 
     // spawn notification bar icon
-    AWKYDO::Notification::RegisterNotificationIcon(hWindow);
+    NOTIFYICONDATA nidNotifyIcon = { };
+    AWKYDO::Notification::GetNotificationIcon(hWindow, &nidNotifyIcon);
+    Shell_NotifyIcon(NIM_ADD, &nidNotifyIcon);
 
     // show window
     ShowWindow(hWindow, nShowCmd);
@@ -60,11 +63,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     // close our window
     CloseWindow(hWindow);
 
+    // remove notification icon
+    Shell_NotifyIcon(NIM_DELETE, &nidNotifyIcon);
+
     // shutdown GDI+
     Gdiplus::GdiplusShutdown(gdiplusToken);
 
     return (int)msg.wParam;
 }
+
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
@@ -72,7 +79,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
         case WM_PAINT: {
             PAINTSTRUCT ps;
             HDC hDc = BeginPaint(hWnd, &ps);
-            DrawIconOnDesktop(hDc, &ps);
+            DrawLogoOnDesktop(hDc, &ps);
             EndPaint(hWnd, &ps);
             return 0;
         }
@@ -82,15 +89,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 // when clicked
                 case WM_LBUTTONDOWN:
                 case WM_RBUTTONDOWN: {
-                    /*HMENU hContextMenu = CreatePopupMenu();
-                    InsertMenu(hContextMenu, 0, MF_BYPOSITION | MF_STRING, 0xb1f891ac45c5451a, _T("Exit"));
-                    TrackPopupMenu(hContextMenu, TPM_BOTTOMALIGN | TPM_LEFTALIGN, 0, 0, 0, hWnd, NULL);*/
-                    // End AWKYDO when notification icon is clicked
-                    PostQuitMessage(0);
+                    HMENU hContextMenu = CreatePopupMenu();
+                    InsertMenu(hContextMenu, 0, MF_BYPOSITION | MF_STRING, AWK_UID_NOTIFY_MENU_EXIT, _T("Exit"));
+                    InsertMenu(hContextMenu, 1, MF_BYPOSITION | MF_STRING, AWK_UID_NOTIFY_MENU_OPENCFG, _T("Open Settings"));
+                    POINT pCursorPos;
+                    GetCursorPos(&pCursorPos);
+                    TrackPopupMenu(hContextMenu, TPM_BOTTOMALIGN | TPM_LEFTALIGN, pCursorPos.x, pCursorPos.y, 0, hWnd, nullptr);
                     }
                 default: {}
             }
             return 0;
+        }
+        case WM_COMMAND: {
+            if (lParam == 0) { // Menu action
+                switch (wParam) {
+                    case AWK_UID_NOTIFY_MENU_EXIT:
+                        PostQuitMessage(0);
+                    case AWK_UID_NOTIFY_MENU_OPENCFG:
+                    default: {
+                    }
+                }
+                return 0;
+            }
         }
         default:
             return DefWindowProc(hWnd, uMsg, wParam, lParam);

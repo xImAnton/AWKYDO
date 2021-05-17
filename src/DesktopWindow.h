@@ -6,7 +6,5 @@
 
 
 namespace AWKYDO {
-    namespace Desktop {
-        HWND GetDesktopBackgroundHandle();
-    }
+    HWND GetDesktopBackgroundHandle();
 }
