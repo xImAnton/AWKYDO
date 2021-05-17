@@ -80,7 +80,7 @@ BOOL CALLBACK EnumTopLevelWindowProc(HWND hwnd, LPARAM lParam) {
  * Searches the Window Handle for the Desktop Background
  * @return the HWND to the desktop background or nullptr of none found
  */
-HWND AWKYDO::Desktop::GetDesktopBackgroundHandle() {
+HWND AWKYDO::GetDesktopBackgroundHandle() {
     EnumTopLevelWindowPayload payload = { nullptr, FALSE };
     EnumWindows(EnumTopLevelWindowProc, reinterpret_cast<LPARAM>(&payload));
 
