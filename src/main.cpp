@@ -7,52 +7,97 @@
 
 #pragma comment (lib, "Gdiplus.lib")
 
-VOID DrawLogoOnDesktop(HDC hDC, PAINTSTRUCT* ps) {
-    Gdiplus::Graphics graphics(hDC);
-
-    // load app logo and display to desktop background
-    auto* im = new Gdiplus::Image(_T("resources/icon.png"));
-
-    // calculate image positions
-    UINT screenHeight = ps->rcPaint.bottom - ps->rcPaint.top - 1;
-    UINT newHeight = screenHeight / 3;
-    UINT newWidth = newHeight * (im->GetWidth() / im->GetHeight());
-    int x = (ps->rcPaint.right - ps->rcPaint.left - newWidth - 1) / 2;
-    int y = (ps->rcPaint.bottom - ps->rcPaint.top - newHeight - 1) / 2;
-    Gdiplus::Rect destRect(x, y, newWidth, newHeight);
-
-    // draw logo
-    graphics.DrawImage(im, destRect);
-}
-
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd) {
-    // first, get the desktop background handle
-    HWND hDesktop = AWKYDO::GetDesktopBackgroundHandle();
-    std::cout << "Desktop Handle: " << hDesktop << std::endl;
-
     // Initialize GDI+.
     Gdiplus::GdiplusStartupInput gdiplusStartupInput;
     ULONG_PTR gdiplusToken;
     Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
 
-    // register window class
-    AWKYDO::Window::RegisterWindowClass(hInstance, WndProc);
-    // spawn a new overlay window
-    HWND hWindow = AWKYDO::Window::CreateOverlayWindow(hInstance, hDesktop);
+    WNDCLASSEX wcex;
+
+    wcex.hInstance = hInstance;
+    wcex.lpszClassName = AWKYDO::Window::sWindowClassName;
+    wcex.lpfnWndProc = WndProc;
+    wcex.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+    wcex.cbSize = sizeof(WNDCLASSEX);
+    wcex.lpszMenuName = nullptr;
+    wcex.cbWndExtra = 0;
+    wcex.cbClsExtra = 0;
+    wcex.hbrBackground = (HBRUSH) COLOR_BACKGROUND;
+    wcex.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+    wcex.hIconSm = LoadIcon(nullptr, IDI_APPLICATION);
+    wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+
+    if (!RegisterClassEx(&wcex)) {
+        MessageBox(nullptr, _T("Call to RegisterClassEx failed!"), AWKYDO::Window::sWindowClassName, NULL);
+        return 1;
+    }
+
+    HWND hDesktop = AWKYDO::GetDesktopBackgroundHandle();
+    std::cout << hDesktop << std::endl;
+
+    HWND hWindow = CreateWindowEx(
+            WS_EX_LAYERED | WS_EX_NOACTIVATE | WS_EX_TRANSPARENT,
+            AWKYDO::Window::sWindowClassName,
+            nullptr,
+            WS_VISIBLE,
+            CW_USEDEFAULT, CW_USEDEFAULT, 500, 500,
+            nullptr,
+            nullptr,
+            hInstance,
+            nullptr
+    );
+
+    if (!hWindow) {
+        MessageBox(nullptr, _T("Call to CreateWindowEx failed!"), AWKYDO::Window::sWindowClassName, NULL);
+        return 1;
+    }
+
+    /* since the windows api doesn't let us create a layered window with WS_CHILD style in the CreateWindowEx Call,
+     * we have to set it afterwards. */
+    if (!SetParent(hWindow, hDesktop)) {
+        MessageBox(nullptr, _T("Call to SetParent failed!"), AWKYDO::Window::sWindowClassName, NULL);
+        return 1;
+    }
+
+    ShowWindow(hWindow, nShowCmd);
+
+    RECT rcWnd;
+    GetWindowRect(hWindow, &rcWnd);
+    SIZE szWnd = { rcWnd.right - rcWnd.left, rcWnd.bottom - rcWnd.top };
+    HDC hdc = GetDC(hWindow);
+    HDC hdcMem = CreateCompatibleDC(hdc);
+    HBITMAP bmMem = CreateCompatibleBitmap(hdc, szWnd.cx, szWnd.cy);
+    SelectObject(hdcMem, bmMem);
+
+    auto* im = new Gdiplus::Image(_T("resources/icon.png"));
+    Gdiplus::Graphics graphics(hdcMem);
+    Gdiplus::Rect rcImgDest(0, 0, szWnd.cx, szWnd.cy);
+
+    graphics.DrawImage(im, rcImgDest);
+
+    HDC hdcScreen = GetDC(nullptr);
+    POINT ptSrc = { 0, 0 };
+
+
+    BLENDFUNCTION bf;
+    bf.AlphaFormat = AC_SRC_ALPHA;
+    bf.BlendFlags = 0;
+    bf.BlendOp = AC_SRC_OVER;
+    bf.SourceConstantAlpha = 255;
+    UpdateLayeredWindow(hWindow, hdcScreen, &ptSrc, &szWnd, hdcMem, &ptSrc, 0, &bf, 2);
+
+    DeleteDC(hdcMem);
+    DeleteObject(bmMem);
 
     // spawn notification bar icon
     NOTIFYICONDATA nidNotifyIcon = { };
     AWKYDO::Notification::GetNotificationIcon(hWindow, &nidNotifyIcon);
     Shell_NotifyIcon(NIM_ADD, &nidNotifyIcon);
-
-    // show window
-    ShowWindow(hWindow, nShowCmd);
-    UpdateWindow(hWindow);
-
     // message loop
     MSG msg;
     while (GetMessage(&msg, nullptr, 0, 0)) {
@@ -61,7 +106,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     }
 
     // close our window
-    CloseWindow(hWindow);
+    DeleteObject(hWindow);
 
     // remove notification icon
     Shell_NotifyIcon(NIM_DELETE, &nidNotifyIcon);
@@ -75,14 +120,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
-        // paint msg
-        case WM_PAINT: {
-            PAINTSTRUCT ps;
-            HDC hDc = BeginPaint(hWnd, &ps);
-            DrawLogoOnDesktop(hDc, &ps);
-            EndPaint(hWnd, &ps);
-            return 0;
-        }
         // events for our notification icon
         case AWK_WM_ICON_NOTIFY: {
             switch (lParam) {

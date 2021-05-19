@@ -13,6 +13,7 @@ BOOL AWKYDO::Window::RegisterWindowClass(HINSTANCE hInst, WNDPROC wndProc) {
     wc.lpfnWndProc = wndProc;
     wc.hInstance = hInst;
     wc.lpszClassName = sWindowClassName;
+    wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 
     if (!RegisterClass(&wc)) {
         MessageBox(nullptr, _T("Call to RegisterClass failed!"), sWindowClassName, NULL);
@@ -36,7 +37,7 @@ HWND AWKYDO::Window::CreateOverlayWindow(HINSTANCE hInst, HWND hDesktop) {
 
     HWND hWindow = CreateWindowEx(
         // extended style: NOACTIVATE --> not focusable, transparent
-        WS_EX_NOACTIVATE,
+        WS_EX_LAYERED,
 
         // our window class
         sWindowClassName,
@@ -45,13 +46,13 @@ HWND AWKYDO::Window::CreateOverlayWindow(HINSTANCE hInst, HWND hDesktop) {
         nullptr,
 
         // window styles
-        WS_CHILD | WS_VISIBLE,
+        0,
 
         // boundaries of desktop background window
         rectDesktopWindow.left, rectDesktopWindow.top, rectDesktopWindow.right, rectDesktopWindow.bottom,
 
         // desktop window as parent
-        hDesktop,
+        nullptr,
 
         // no menubar
         nullptr,
