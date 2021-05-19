@@ -7,7 +7,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_compile_definitions(_UNICODE)
 add_compile_definitions(UNICODE)
 
-file(GLOB SOURCES CONFIGURE_DEPENDS "src/*.h" "src/*.cpp")
+set(SOURCES
+    src/main.cpp
+    src/DesktopWindow.cpp
+    src/window.cpp
+    src/notification.cpp)
 
 add_executable(AWKYDO WIN32 ${SOURCES})
 

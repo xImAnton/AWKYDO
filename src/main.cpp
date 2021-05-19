@@ -105,7 +105,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 switch (wParam) {
                     case AWK_UID_NOTIFY_MENU_EXIT:
                         PostQuitMessage(0);
+                        break;
                     case AWK_UID_NOTIFY_MENU_OPENCFG:
+                        printf("open cfg");
                     default: {
                     }
                 }

@@ -34,7 +34,7 @@ HWND AWKYDO::Window::CreateOverlayWindow(HINSTANCE hInst, HWND hDesktop) {
     RECT rectDesktopWindow;
     GetClientRect(hDesktop, &rectDesktopWindow);
 
-    return CreateWindowEx(
+    HWND hWindow = CreateWindowEx(
         // extended style: NOACTIVATE --> not focusable, transparent
         WS_EX_NOACTIVATE,
 
@@ -61,4 +61,6 @@ HWND AWKYDO::Window::CreateOverlayWindow(HINSTANCE hInst, HWND hDesktop) {
 
         // lpParam
         nullptr);
+
+    return hWindow;
 }
